@@ -3,6 +3,7 @@ package graphql.kickstart.spring.webclient.boot;
 import static java.util.Collections.emptyList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,8 +59,30 @@ public class GraphQLResponse {
     return null;
   }
 
+  public <T> T get(String fieldName, TypeReference<T> typeRef) {
+    if (data.hasNonNull(fieldName)) {
+      return objectMapper.convertValue(data.get(fieldName), typeRef);
+    }
+    return null;
+  }
+
+  public <T> T get(String fieldName, JavaType type) {
+    if (data.hasNonNull(fieldName)) {
+      return objectMapper.convertValue(data.get(fieldName), type);
+    }
+    return null;
+  }
+
   public <T> T getFirst(Class<T> type) {
     return getFirstDataEntry().map(it -> objectMapper.convertValue(it, type)).orElse(null);
+  }
+
+  public <T> T getFirst(TypeReference<T> typeRef) {
+    return getFirstDataEntry().map(it -> objectMapper.convertValue(it, typeRef)).orElse(null);
+  }
+
+  public <T> T getFirst(JavaType type) {
+    return (T) getFirstDataEntry().map(it -> objectMapper.convertValue(it, type)).orElse(null);
   }
 
   private Optional<JsonNode> getFirstDataEntry() {
